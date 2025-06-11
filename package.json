@@ -6,13 +6,17 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "create-dev": "npx eas-cli build --profile development",
+    "create-prod": "npx eas-cli build --profile production"
   },
   "dependencies": {
     "expo": "~53.0.11",
     "expo-status-bar": "~2.2.3",
     "react": "19.0.0",
-    "react-native": "0.79.3"
+    "react-native": "0.79.3",
+    "expo-dev-client": "~5.2.0",
+    "expo-updates": "~0.28.14"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
