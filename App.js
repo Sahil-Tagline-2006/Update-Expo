@@ -1,50 +1,72 @@
-import React, { useEffect, useState } from "react";
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import {
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+} from "react-native";
 import * as Updates from "expo-updates";
 
 export default function App() {
   const [modalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const hasCheckedUpdate = useRef(false); 
 
   useEffect(() => {
     const checkForUpdate = async () => {
-      if (!__DEV__) {
+      if (!__DEV__ && !hasCheckedUpdate.current) {
         try {
           const update = await Updates.checkForUpdateAsync();
           if (update.isAvailable) {
             setModalVisible(true);
+            hasCheckedUpdate.current = true;
           }
         } catch (e) {
           console.error("Failed to check for update:", e);
         }
       }
     };
-    const interval=setInterval(()=>{
-      checkForUpdate();
-    },1000)
 
-    return()=>clearInterval(interval)
+    const interval = setInterval(() => {
+      checkForUpdate();
+    }, 3000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const handleUpdate = async () => {
     try {
+      setLoading(true);
+      setModalVisible(false); // hide modal while updating
       await Updates.fetchUpdateAsync();
       await Updates.reloadAsync();
     } catch (e) {
       console.error("Failed to update:", e);
+      setLoading(false); // stop loader on error
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text>Hello Brothers!! Updated By TagLine </Text>
+      <Text>Hello Brothers!! Updated By TagLine Developers</Text>
 
+      {/* Loader Modal */}
+      <Modal visible={loading} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.loaderContainer}>
+            <ActivityIndicator size="large" color="#2196F3" />
+            <Text style={{ marginTop: 10 }}>Updating...</Text>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Update Prompt Modal */}
       <Modal
         visible={modalVisible}
-        transparent={true}
+        transparent
         animationType="fade"
-        onRequestClose={() => {
-          setModalVisible(true);
-        }}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
@@ -54,11 +76,7 @@ export default function App() {
             </Text>
             <View style={styles.buttonRow}>
               <TouchableOpacity
-                style={[styles.button, styles.cancel]}
-                onPress={() => {
-                  setModalVisible(true);
-                }}
-              >
+                style={[styles.button, styles.cancel]}>
                 <Text style={styles.buttonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -74,6 +92,7 @@ export default function App() {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -122,5 +141,11 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  loaderContainer: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
   },
 });
